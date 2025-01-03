@@ -10,11 +10,11 @@ import {
   TouchSensor,
   defaultDropAnimationSideEffects,
   closestCorners,
-  closestCenter,
+  // closestCenter,
   useSensor,
   useSensors,
   pointerWithin,
-  rectIntersection,
+  // rectIntersection,
   getFirstCollision
 } from '@dnd-kit/core'
 import { arrayMove } from '@dnd-kit/sortable'
@@ -287,25 +287,29 @@ function BoardContent ({ board }) {
       return closestCorners ({ ...args })
     }
 
-    // Tìm các điểm giao nhau, va chạm - intersections với con trỏ.
+    // Tìm các điểm giao nhau, trả về một mảng các va chạm - intersections với con trỏ.
     const poiterIntersections = pointerWithin(args)
 
-    // Thuật toán phát hiện va chạm sẽ trả về một mảng các va chạm ở đây.
-    const intersections = !!poiterIntersections?.length
-      ? poiterIntersections
-      : rectIntersection(args)
+    // Fix triệt để cái bug flickering của thư viện DnD-kit trong trường hợp sau:
+    // - Kéo một cái card có  image cover lớn và kéo lên phía trên cùng ra khỏi khu vực kéo thả
+    if (!poiterIntersections?.length) return
 
-    // Tìm overId đầu tiên trong đám intersection ở trên.
-    let overId = getFirstCollision(intersections, 'id')
+    // Thuật toán phát hiện va chạm sẽ trả về một mảng các va chạm ở đây.
+    // const intersections = !!poiterIntersections?.length
+    //   ? poiterIntersections
+    //   : rectIntersection(args)
+
+    // Tìm overId đầu tiên trong đám poiterIntersections ở trên.
+    let overId = getFirstCollision(poiterIntersections, 'id')
     if (overId) {
       /**
        * Nếu cái over nó là column thì sẽ tìm tới cái cardId gần nhất bên trong khu vực va chạm đó dựa vào
-       * thuật toán phát hiện va chạm closestCenter hoặc closesCorners đều được. Tuy nhiên ở đây dùng closestCenter
+       * thuật toán phát hiện va chạm closestCenter hoặc closesCorners đều được. Tuy nhiên ở đây dùng closesCorners
        * mượt hơn
        */
       const checkColumn = orderedColumns.find(column => column._id === overId)
       if (checkColumn) {
-        overId = closestCenter({
+        overId = closestCorners({
           ...args,
           droppableContainers: args.droppableContainers.filter(container => {
             return (container._id !== overId) && (checkColumn?. cardOrderIds?.includes(container.id))
@@ -318,7 +322,7 @@ function BoardContent ({ board }) {
     }
 
     // Nếu overId là null thì trả về mảng rỗng - tránh bug crash trang.
-    return lastOverId.current ? [{ id: lastOverId.current}] : []
+    return lastOverId.current ? [{ id: lastOverId.current }] : []
   }, [activeDragItemType, orderedColumns])
 
   return (
