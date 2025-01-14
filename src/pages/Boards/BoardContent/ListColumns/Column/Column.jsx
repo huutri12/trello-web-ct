@@ -35,7 +35,7 @@ function Column({ column }) {
     transition,
     // Chiều cao phải luôn max 100% vì nếu không sẽ lỗi lúc kéo coloumn ngắn qua một cái column dài thì phải kéo
     // ở khu vuejc giữa giữa rất khó chịu. Lưu ý lúc này phải kết hợp với {...listenner} nằm ở Box chứ không phải
-    // ở ngoài div ngoài cùng để tránh trường hợp kéo vào vùng xanh 
+    // ở ngoài div ngoài cùng để tránh trường hợp kéo vào vùng xanh
     height: '100%',
     opacity: isDragging ? 0.5 : undefined
   }
